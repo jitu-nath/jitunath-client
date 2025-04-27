@@ -3,7 +3,7 @@ import { DocumentTable } from '@/components/documents/document-table';
 
 export default function Home() {
   return (
-    <MainLayout title="All Data" showAddButton>
+    <MainLayout title="All Data " showAddButton>
       <DocumentTable />
     </MainLayout>
   );

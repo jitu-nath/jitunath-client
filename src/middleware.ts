@@ -32,8 +32,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Special admin access: user with specific email can access any route
-  if (user && user.email === "kafikafi1922@gmail.com") {
+
+  if (user) {
     return NextResponse.next();
   }
 

@@ -1,10 +1,10 @@
 'use client';
 
-import { useAppSelector } from '@/redux/hooks';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Plus } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface HeaderProps {
   title: string;
@@ -21,7 +21,22 @@ export function Header({
 }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const user = useAppSelector((state) => state.user.currentUser);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkIfMobile();
+
+    // Add event listener
+    window.addEventListener("resize", checkIfMobile);
+
+    // Clean up
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
   
   const handleBack = () => {
     if (pathname.includes('/add')) {
@@ -32,6 +47,7 @@ export function Header({
       router.back();
     }
   };
+
 
   return (
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
@@ -49,22 +65,12 @@ export function Header({
           {showAddButton && (
             <Button onClick={onAddClick} className="gap-1">
               <Plus className="h-4 w-4" />
-              Add New
+              
+             {isMobile || `Add New ` }
             </Button>
           )}
           
-          {user && (
-            <div className="flex items-center gap-2">
-              <div className="text-right mr-2">
-                <p className="text-sm font-medium">Welcome, {user.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Have a nice day</p>
-              </div>
-              <Avatar>
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </div>
-          )}
+     
         </div>
       </div>
     </header>

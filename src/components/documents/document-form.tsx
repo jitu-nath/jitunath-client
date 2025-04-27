@@ -17,6 +17,7 @@ import {
   useUpdateDocumentMutation,
 } from "@/redux/api/baseApi";
 import { toast } from "sonner";
+import { useAppSelector } from "@/redux/hooks";
 
 // Define the UploadedImage interface
 interface UploadedImage {
@@ -28,7 +29,7 @@ interface UploadedImage {
 
 const formSchema = z.object({
   balamNo: z.string().min(1, { message: "BalamNo  is required" }),
-  dholilNo: z.string().min(1, { message: "Dholil No is required" }),
+
   pageNo: z.string().min(1, { message: "Page No is required" }),
   // year: z.string().min(1, { message: "Year is required" }),
   year: z.union([
@@ -52,7 +53,8 @@ export function DocumentForm({ initialData, isEditing = false }: any) {
     initialData,
     isEditing,
   });
-
+  const selectedYear = useAppSelector((state) => state.documents.selectedYear);
+console.log(selectedYear, "selectedYear");
   // State for uploaded images from Cloudinary
   const [uploadedImages, setUploadedImages] = useState(
     initialData?.images ? initialData.images : []
@@ -66,11 +68,14 @@ export function DocumentForm({ initialData, isEditing = false }: any) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       balamNo: initialData?.balamNo || "",
-      dholilNo: initialData?.dholilNo || "",
       pageNo: initialData?.pageNo || "",
-      year: initialData?.year.toString() || new Date().getFullYear().toString(),
+      year:
+        initialData?.year?.toString() ||
+        (selectedYear && !isNaN(Number(selectedYear))
+          ? selectedYear.toString()
+          : ""),
       images: initialData?.images || [],
-    },
+    }
   });
 
   const [createDataHandle] = useCreateDocumentMutation();
@@ -78,8 +83,10 @@ export function DocumentForm({ initialData, isEditing = false }: any) {
   const handleImageUpload = (images: UploadedImage[]) => {
     setUploadedImages(images);
   };
-
+console.log("dddd");
+console.log(isSubmitting);
   const onSubmit = async (data: FormValues) => {
+    console.log("hello", data);
     try {
       // Log the form data with images before submitting
       console.log({
@@ -109,6 +116,7 @@ export function DocumentForm({ initialData, isEditing = false }: any) {
             return image.url;
           }),
         });
+        window.location.href = `/year/${data.year}`;
       } else {
         const newDocument = {
           ...data,
@@ -148,17 +156,6 @@ export function DocumentForm({ initialData, isEditing = false }: any) {
             <p className="text-sm text-red-500">{errors.balamNo.message}</p>
           )}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="dholilNo">Dholil No</Label>
-          <Input
-            id="dholilNo"
-            placeholder="Enter a dholil number"
-            {...register("dholilNo")}
-          />
-          {errors.dholilNo && (
-            <p className="text-sm text-red-500">{errors.dholilNo.message}</p>
-          )}
-        </div>
 
         <div className="space-y-2">
           <Label htmlFor="pageNo">Page No</Label>
@@ -193,6 +190,7 @@ export function DocumentForm({ initialData, isEditing = false }: any) {
       <div className="flex justify-end">
         <button
           type="submit"
+          onClick={() => console.log("Button clicked")}
           disabled={isSubmitting}
           className={`font-semibold py-2 px-4 rounded ${
             isSubmitting

@@ -77,18 +77,32 @@ export function DocumentTable() {
   const documents = data.data;
 
   selectedYear = Number(selectedYear);
-
   // Filter documents by year if selected
   const filteredByYear = selectedYear
     ? documents.filter((doc: any) => doc.year === selectedYear)
     : documents;
 
   // Filter by search term
-  const filteredDocuments = searchTerm
+  const allFilteredDocuments = searchTerm
     ? filteredByYear.filter((doc: any) =>
         doc.dholilNo.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : filteredByYear;
+
+
+  const filteredDocuments = [...allFilteredDocuments].sort((a: any, b: any) => {
+    const numA = Number(a.dholilNo);
+    const numB = Number(b.dholilNo);
+
+    const isNaA = isNaN(numA);
+    const isNaB = isNaN(numB);
+
+    if (isNaA && isNaB) return 0; // both invalid
+    if (isNaA) return 1; // a is invalid, b is valid => b comes first
+    if (isNaB) return -1; // b is invalid, a is valid => a comes first
+
+    return numA - numB; // both valid, sort numerically
+  });
 
   // Pagination
   const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);

@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileText } from "lucide-react";
-import { useUserLoginMutation, useVerifyLoginMutation } from "@/redux/api/baseApi";
-import { ro } from "date-fns/locale";
-import Link from "next/link";
-import { toast } from "sonner";
+import {
+  useUserLoginMutation,
+  useVerifyLoginMutation,
+} from "@/redux/api/baseApi";
 
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,41 +47,15 @@ export default function LoginPage() {
       setError("Invalid email or password");
     }
     console.log("login response");
-    if (res.data?.success) {
-      setUserEmail(email);
-      setToggleLoginCode(true);
-      setError("");
+    console.log(res.data);
+
+    if (res?.data?.data?.accessToken) {
+      Cookies.set("accessToken", res?.data?.data?.accessToken, {
+        expires: 7,
+      });
+      router.push("/");
     }
   };
-  const handleVerificationCodeSubmit =async (e: any) => {
-    e.preventDefault();
-    console.log("Verification code submitted:", verificationCode.join(""));
-    if (verificationCode.join("").length < 6) {
-      console.log(verificationCode);
-      setError("Please enter a valid 6-digit code");
-      return;
-    }
-    const code = Number(verificationCode.join(""));
-    console.log(isNaN(code));
-    if (isNaN(code)) {
-      setError("Please enter a valid 6-digit code. (Only numbers)");
-      return;
-    }
-  const res:any =await verificationMutation({ email:userEmail,oneTimeCode:code });
-
-if(res?.error){
- toast.error(res.error.data.message);
-  setError(res.error.data.message);
-}
-
-  if(res?.data?.data?.accessToken){
-
-    Cookies.set("accessToken", res?.data?.data?.accessToken, {
-      expires: 7
-    });
-    router.push("/");
-  }
-};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950 p-4">
@@ -134,7 +109,9 @@ if(res?.error){
                 Log in
               </Button>
             </form>
-            <div className="text-blue-500 underline  cursor-pointer flex justify-end"><Link href={'/forget-password'}>forget password</Link>  </div>
+            <div className="text-blue-500 underline  cursor-pointer flex justify-end">
+              <Link href={"/forget-password"}>forget password</Link>{" "}
+            </div>
           </div>
 
           <div
@@ -151,59 +128,6 @@ if(res?.error){
             <p className="text-red-400 mx-auto text-lg px-4 font-medium">
               {error}
             </p>
-          </div>
-
-          <div className={`p-8 ${toggleLoginCode ? "" : "hidden"}`}>
-            <h2 className="text-xl font-semibold mb-6 text-center">
-              Enter 6-digit verification code
-            </h2>
-
-            <form
-              onSubmit={(e) => handleVerificationCodeSubmit(e)}
-              className="space-y-4"
-            >
-              <div className="flex justify-between gap-2 mb-6">
-                {[...Array(6)].map((_, i) => (
-                  <Input
-                    key={i}
-                    className="w-12 h-12 text-center text-lg font-bold"
-                    maxLength={1}
-                    value={verificationCode[i]}
-                    onChange={(e) => {
-                      const newCode = [...verificationCode];
-                      newCode[i] = e.target.value;
-                      setVerificationCode(newCode);
-
-                      // Auto-focus next input when digit is entered
-                      if (
-                        e.target.value &&
-                        e.target.nextElementSibling instanceof HTMLInputElement
-                      ) {
-                        e.target.nextElementSibling.focus();
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      // Handle backspace to go to previous input
-                      if (
-                        e.key === "Backspace" &&
-                        !e.currentTarget.value &&
-                        e.currentTarget.previousElementSibling instanceof
-                          HTMLInputElement
-                      ) {
-                        e.currentTarget.previousElementSibling.focus();
-                      }
-                    }}
-                  />
-                ))}
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-slate-500 hover:bg-slate-600 text-white font-semibold text-lg"
-              >
-                Verify
-              </Button>
-            </form>
           </div>
         </div>
       </div>

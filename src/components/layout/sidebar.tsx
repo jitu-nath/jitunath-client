@@ -12,6 +12,7 @@ import {
   Settings,
   ChevronDown,
   ChevronUp,
+  Plus,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,10 @@ export function Sidebar() {
     router.push(`/year/${year}`);
     // Close mobile menu after navigation
     setIsMobileMenuOpen(false);
-  };
+  }; 
+  const onAddClick = () => {
+    router.push("/add");
+  }
 
   const handleLogout = () => {
     Cookies.remove("accessToken", { path: "/" });
@@ -88,16 +92,22 @@ export function Sidebar() {
         <div className="p-6">
           <h2 className="text-2xl font-bold tracking-tight">JITU NATH</h2>
         </div>
-
+      
         <div className="flex-1 overflow-auto py-2">
           <div className="px-3 py-2">
+          <div className="flex items-center gap-4">
+          <Button  onClick={onAddClick}  className="gap-1 bg-slate-700 w-full my-3 text-white">
+            <Plus className="h-4 w-4" />
+            Add New
+          </Button>
+        </div>
             <div
               className="flex items-center justify-between px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={() => setIsDataOpen(!isDataOpen)}
             >
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4" />
-                <span>All Data</span>
+                <span>All Data </span>
               </div>
               {isDataOpen ? (
                 <ChevronUp className="h-4 w-4" />
