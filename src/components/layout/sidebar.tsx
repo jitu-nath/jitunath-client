@@ -8,11 +8,12 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import {
   LogOut,
-  FileText,
+
   Settings,
-  ChevronDown,
-  ChevronUp,
+
   Plus,
+ 
+  Menu,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ export function Sidebar() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const selectedYear = useAppSelector((state) => state.documents.selectedYear);
-  const [isDataOpen, setIsDataOpen] = useState(true);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Close sidebar when screen size changes to desktop
@@ -57,20 +58,22 @@ export function Sidebar() {
   if (isLoading) return <div>Loading...</div>;
 
   let years = data.data.map((doc: any) => doc.year);
-  years = new Set(["All-Documents", ...years]);
-  years = Array.from(years);
+  years = new Set([...years]);
+  // years = new Set(["All-Documents", ...years]);
+  years = Array.from(years).sort((a, b) => Number(a) - Number(b));
 
   return (
     <>
       {/* Mobile menu toggle button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
+      <div className="lg:hidden fixed top-4 right-4 z-50">
         <Button
-          variant="outline"
+          variant="destructive"
           size="icon"
-          className="rounded-full"
+          className="rounded-full  bg-black "
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {/* <X className="h-5 w-5" /> */}
+       
+          <Menu className="h-5 w-5 text-white" />
         </Button>
       </div>
 
@@ -89,6 +92,7 @@ export function Sidebar() {
           isMobileMenuOpen ? "left-0" : "-left-[240px] lg:left-0"
         )}
       >
+  
         <div className="p-6">
           <h2 className="text-2xl font-bold tracking-tight">JITU NATH</h2>
         </div>
@@ -101,22 +105,9 @@ export function Sidebar() {
             Add New
           </Button>
         </div>
-            <div
-              className="flex items-center justify-between px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
-              onClick={() => setIsDataOpen(!isDataOpen)}
-            >
-              <div className="flex items-center gap-3">
-                <FileText className="h-4 w-4" />
-                <span>All Data </span>
-              </div>
-              {isDataOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </div>
+         
 
-            {isDataOpen && (
+     
               <div className="mt-1 ml-2 space-y-1">
                 {years.map((year: any) => (
                   <div
@@ -133,7 +124,7 @@ export function Sidebar() {
                   </div>
                 ))}
               </div>
-            )}
+            
           </div>
         </div>
 

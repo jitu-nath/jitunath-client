@@ -42,6 +42,9 @@ export const baseApi = createApi({
         };
       },
     }),
+    getDocumentCount: builder.query({
+      query: (year) => `document/count/${year}`,
+    }),
     getSingleDocument: builder.query({
       query: (id) => `document/${id}`,
     }),
@@ -116,4 +119,5 @@ export const {
   useResetPasswordOtpMutation,
   useResetPasswordTokenMutation,
   useResetPasswordSendOtpMutation,
+  useGetDocumentCountQuery,
 } = baseApi;

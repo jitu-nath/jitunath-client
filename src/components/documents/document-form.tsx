@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,10 +10,12 @@ import { useRouter } from "next/navigation";
 import { DocumentEntry } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch"; // Add this import
 
 import ImageUpload from "../ImageUpload";
 import {
   useCreateDocumentMutation,
+  useGetDocumentCountQuery,
   useUpdateDocumentMutation,
 } from "@/redux/api/baseApi";
 import { toast } from "sonner";
@@ -29,6 +31,7 @@ interface UploadedImage {
 
 const formSchema = z.object({
   balamNo: z.string().min(1, { message: "BalamNo  is required" }),
+  dholilNo: z.string().min(1, { message: "Dholil No is required" }),
 
   pageNo: z.string().min(1, { message: "Page No is required" }),
   // year: z.string().min(1, { message: "Year is required" }),
@@ -53,40 +56,60 @@ export function DocumentForm({ initialData, isEditing = false }: any) {
     initialData,
     isEditing,
   });
+  const [dholilNo, setDholilNo] = useState("");
   const selectedYear = useAppSelector((state) => state.documents.selectedYear);
-console.log(selectedYear, "selectedYear");
+  const { data } = useGetDocumentCountQuery(selectedYear);
+  console.log(selectedYear, "selectedYear");
+  console.log(data?.data, "data");
   // State for uploaded images from Cloudinary
   const [uploadedImages, setUploadedImages] = useState(
     initialData?.images ? initialData.images : []
   );
 
+  // Add state for dholilNo toggle
+  const [isDholilEnabled, setIsDholilEnabled] = useState(false);
+
+  console.log(initialData?.dholilNo || data?.data + 1 || "", "dholilNo");
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue, // Get setValue from useForm
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       balamNo: initialData?.balamNo || "",
       pageNo: initialData?.pageNo || "",
+      dholilNo: dholilNo,
       year:
         initialData?.year?.toString() ||
         (selectedYear && !isNaN(Number(selectedYear))
           ? selectedYear.toString()
           : ""),
       images: initialData?.images || [],
-    }
+    },
   });
+
+// Update the form value when dholilNo changes
+useEffect(() => {
+  if (isEditing && initialData) {
+    setDholilNo(initialData?.dholilNo || String(data?.data + 1) || "");
+    setValue("dholilNo", initialData?.dholilNo || String(data?.data + 1) || "");
+  } else {
+    setDholilNo(String(data?.data + 1) || "");
+    setValue("dholilNo", String(data?.data + 1) || "");
+  }
+}, [isEditing, initialData, data?.data, setValue]);
+  console.log(typeof dholilNo, "dholilNo type");
+  console.log(dholilNo, "dholilNo");
 
   const [createDataHandle] = useCreateDocumentMutation();
   const [updateDataHandle] = useUpdateDocumentMutation();
   const handleImageUpload = (images: UploadedImage[]) => {
     setUploadedImages(images);
   };
-console.log("dddd");
-console.log(isSubmitting);
   const onSubmit = async (data: FormValues) => {
-    console.log("hello", data);
     try {
       // Log the form data with images before submitting
       console.log({
@@ -127,6 +150,7 @@ console.log(isSubmitting);
               ? uploadedImages
               : uploadedImages.map((image: any) => image.url),
         };
+        console.log(newDocument);
 
         const submitData: any = await createDataHandle(newDocument);
         console.log(submitData);
@@ -145,6 +169,35 @@ console.log(isSubmitting);
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="dholilNo">Dholil No</Label>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="dholil-toggle" className="text-sm">
+                {isDholilEnabled ? "Enabled" : "Disabled"}
+              </Label>
+              <Switch
+                className=""
+                id="dholil-toggle"
+                checked={isDholilEnabled}
+                onCheckedChange={setIsDholilEnabled}
+              />
+            </div>
+          </div>
+          <Input
+            id="dholilNo"
+            placeholder="Enter a dholil number"
+            defaultValue={
+              dholilNo || initialData?.dholilNo || String(data?.data + 1) || ""
+            }
+            {...register("dholilNo")}
+            readOnly={!isDholilEnabled}
+            className={!isDholilEnabled ? "bg-gray-100 text-gray-500" : ""}
+          />
+          {errors.balamNo && (
+            <p className="text-sm text-red-500">{errors.balamNo.message}</p>
+          )}
+        </div>
         <div className="space-y-2">
           <Label htmlFor="balamNo">Balam No</Label>
           <Input
@@ -204,3 +257,7 @@ console.log(isSubmitting);
     </form>
   );
 }
+function setValue(arg0: string, arg1: string) {
+  throw new Error("Function not implemented.");
+}
+

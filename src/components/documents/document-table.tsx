@@ -23,6 +23,7 @@ import {
   BookOpen,
   Calendar,
   Image as ImageIcon,
+  Plus,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -142,6 +143,9 @@ export function DocumentTable() {
       }
     }
   };
+  const onAddClick =()=>{
+    router.push('/add')
+  }
 
   const cancelDelete = () => {
     setDeleteId(null);
@@ -167,6 +171,18 @@ export function DocumentTable() {
               dispatch(setCurrentPage(1));
             }}
           />
+        </div>
+        <div className="flex items-center gap-4">
+          {isMobile && (
+            <Button onClick={onAddClick} className="gap-1">
+              Add New
+              <Plus className="h-4 w-4" />
+              
+             {isMobile || `Add New ` }
+            </Button>
+          )}
+          
+     
         </div>
       </div>
 
